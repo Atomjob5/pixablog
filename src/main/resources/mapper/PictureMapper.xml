@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.atom.pixablog.mapper.PictureMapper">
+    <select id="selectByLimit" resultMap="sysPictureMap" >
+        SELECT
+            sp.*,
+            su.id AS `su_id`,
+            su.NAME,
+            su.description,
+            su.sex
+        FROM
+            sys_picture sp
+            LEFT JOIN sys_user su ON sp.user_id = su.id
+        ORDER BY
+            sp.id DESC
+        limit <if test="limit!=null">#{limit},</if>#{count}
+
+    </select>
+
+    <select id="selectMostLike" resultMap="sysPictureMap">
+        SELECT
+            sp.*,
+            su.id as `su_id`,
+            su.name,
+            su.sex,
+            su.description,
+            su.profile_photo
+        FROM
+            sys_picture sp
+            LEFT JOIN sys_user su ON sp.user_id = su.id
+        ORDER BY
+            `likes` DESC
+            LIMIT 2
+    </select>
+
+    <select id="selectHistoryMostLike" resultMap="sysPictureMap">
+        SELECT
+            sp.*,
+            su.id AS `su_id`,
+            su.NAME,
+            su.sex,
+            su.description,
+            su.profile_photo
+        FROM
+            sys_picture sp
+            LEFT JOIN sys_user su ON sp.user_id = su.id
+        WHERE
+            PERIOD_DIFF( DATE_FORMAT( NOW( ), '%y%m' ), DATE_FORMAT( sp.create_time, '%y%m' ) ) = 1
+        ORDER BY
+            sp.`likes` DESC
+            LIMIT 5
+    </select>
+
+    <resultMap id="sysPictureMap" type="com.atom.pixablog.po.SysPicture" autoMapping="true">
+        <id column="id" property="id" />
+        <result column="create_time" property="createTime" />
+        <result column="user_id" property="userId" />
+        <collection property="sysUser" ofType="com.atom.pixablog.po.SysUser" autoMapping="true">
+            <id column="su_id" property="id" />
+            <result column="profile_photo" property="profilePhoto" />
+        </collection>
+    </resultMap>
+</mapper>
